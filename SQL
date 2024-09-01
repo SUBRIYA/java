@@ -1,0 +1,90 @@
+-- Create the Railway Reservation System Database
+CREATE DATABASE RailwayReservationSystem;
+USE RailwayReservationSystem;
+
+-- Create the Train Table
+CREATE TABLE Train (
+    train_id INT PRIMARY KEY AUTO_INCREMENT,
+    train_name VARCHAR(100) NOT NULL,
+    source VARCHAR(50) NOT NULL,
+    destination VARCHAR(50) NOT NULL,
+    total_seats INT NOT NULL
+);
+
+-- Create the Passenger Table
+CREATE TABLE Passenger (
+    passenger_id INT PRIMARY KEY AUTO_INCREMENT,
+    first_name VARCHAR(50) NOT NULL,
+    last_name VARCHAR(50) NOT NULL,
+    age INT NOT NULL,
+    gender ENUM('Male', 'Female', 'Other') NOT NULL,
+    contact_number VARCHAR(15) NOT NULL
+);
+
+-- Create the Reservation Table
+CREATE TABLE Reservation (
+    reservation_id INT PRIMARY KEY AUTO_INCREMENT,
+    train_id INT,
+    passenger_id INT,
+    reservation_date DATE NOT NULL,
+    seat_number INT NOT NULL,
+    status ENUM('Confirmed', 'Cancelled') DEFAULT 'Confirmed',
+    FOREIGN KEY (train_id) REFERENCES Train(train_id),
+    FOREIGN KEY (passenger_id) REFERENCES Passenger(passenger_id)
+);
+
+-- Create the Schedule Table
+CREATE TABLE Schedule (
+    schedule_id INT PRIMARY KEY AUTO_INCREMENT,
+    train_id INT,
+    departure_time DATETIME NOT NULL,
+    arrival_time DATETIME NOT NULL,
+    FOREIGN KEY (train_id) REFERENCES Train(train_id)
+);
+
+-- Insert Sample Data into the Train Table
+INSERT INTO Train (train_name, source, destination, total_seats)
+VALUES 
+('Express A', 'City A', 'City B', 150),
+('Express B', 'City B', 'City C', 200),
+('Express C', 'City A', 'City C', 180);
+
+-- Insert Sample Data into the Passenger Table
+INSERT INTO Passenger (first_name, last_name, age, gender, contact_number)
+VALUES 
+('John', 'Doe', 30, 'Male', '1234567890'),
+('Jane', 'Smith', 25, 'Female', '0987654321'),
+('Alex', 'Johnson', 45, 'Other', '1230984567');
+
+-- Insert Sample Data into the Schedule Table
+INSERT INTO Schedule (train_id, departure_time, arrival_time)
+VALUES 
+(1, '2024-09-05 10:00:00', '2024-09-05 15:00:00'),
+(2, '2024-09-06 08:00:00', '2024-09-06 12:30:00'),
+(3, '2024-09-07 09:00:00', '2024-09-07 14:00:00');
+
+-- Insert Sample Data into the Reservation Table
+INSERT INTO Reservation (train_id, passenger_id, reservation_date, seat_number, status)
+VALUES 
+(1, 1, '2024-09-01', 10, 'Confirmed'),
+(2, 2, '2024-09-02', 22, 'Confirmed'),
+(3, 3, '2024-09-03', 5, 'Confirmed');
+
+-- Query: View All Trains
+SELECT * FROM Train;
+
+-- Query: View Train Schedule
+SELECT Train.train_name, Schedule.departure_time, Schedule.arrival_time
+FROM Schedule
+JOIN Train ON Schedule.train_id = Train.train_id;
+
+-- Query: View Reservations for a Specific Train
+SELECT Passenger.first_name, Passenger.last_name, Reservation.seat_number, Reservation.status
+FROM Reservation
+JOIN Passenger ON Reservation.passenger_id = Passenger.passenger_id
+WHERE Reservation.train_id = 1;
+
+-- Query: Cancel a Reservation
+UPDATE Reservation
+SET status = 'Cancelled'
+WHERE reservation_id = 1;
